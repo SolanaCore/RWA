@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup Solana Environment
         uses: DhruvWebDev/solana-setup-action@v0.1.8
         with:
@@ -20,4 +20,4 @@ jobs:
           build-script: 'cargo install --git https://github.com/4rjunc/solana-chio --force && chio build'
           # Add --skip-local-validator else the build would fail and another tip is to add --skip-build flag to fasten up the workflow because we have already built it in the anchor build
           x-ray-enabled: true
-          working-directory: './v1'
+          working-directory: 'v1'

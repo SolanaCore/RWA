@@ -13,7 +13,7 @@ use v1::states::{to_bytes, MyState};
 use solana_sdk::rent::Rent;
 use solana_sdk::sysvar::Sysvar;
 
-pub const PROGRAM: Pubkey = pubkey!("AXHHbRoGTgZTVf862VfodSP6RBdfzTXx7MWwDnwCnTpg");
+pub const PROGRAM: Pubkey = pubkey!("FqqrXWzPLkYZsg2r4GfMdzWSdYHorCdkyhupmxRXAzVq");
 
 pub const RENT: Pubkey = pubkey!("SysvarRent111111111111111111111111111111111");
 
