@@ -2,7 +2,7 @@ use pinocchio::pubkey::Pubkey;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, shank::ShankAccount)]
-pub struct InitTokenConfig {
+pub struct TokenConfig {
     pub bump: u8, 
     pub creator: Pubkey,         // 32 bytes
     pub mint: Pubkey,
@@ -17,7 +17,7 @@ pub trait DataLen {
     const LEN: usize;
 }
 
-impl DataLen for InitTokenConfig {
+impl DataLen for TokenConfig {
     const LEN: usize = core::mem::size_of::<TokenConfig>();
     // = 203 bytes
 }
