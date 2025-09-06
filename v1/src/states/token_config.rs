@@ -1,9 +1,8 @@
-use crate::instructions::RWAInstruction::InitGlobalConfig;
 use pinocchio::pubkey::Pubkey;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, shank::ShankAccount)]
-pub struct TokenConfig {
+pub struct InitTokenConfig {
     pub bump: u8, 
     pub creator: Pubkey,         // 32 bytes
     pub mint: Pubkey,
@@ -18,7 +17,7 @@ pub trait DataLen {
     const LEN: usize;
 }
 
-impl DataLen for TokenConfig {
+impl DataLen for InitTokenConfig {
     const LEN: usize = core::mem::size_of::<TokenConfig>();
     // = 203 bytes
 }
