@@ -30,7 +30,7 @@ pub struct TokenConfigAccounts<'a> {
 /// Instruction wrapper for InitTokenConfig
 pub struct InitTokenConfigInstruction<'a> {
     pub accounts: TokenConfigAccounts<'a>,
-    pub instruction_datas: InitTokenConfig,
+    pub instruction_datas: TokenConfig,
 }
 
 impl<'a> TryFrom<&'a [AccountInfo<'a>]> for TokenConfigAccounts<'a> {
