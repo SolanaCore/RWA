@@ -1,4 +1,10 @@
-use pinocchio::account_info::AccountInfo
+use {
+    pinocchio::{
+        account_info::AccountInfo,
+        program_error::ProgramError
+    },
+    crate::erors::RWAError,
+};
 
 pub mod ata;
 pub mod helper;
@@ -6,7 +12,7 @@ pub mod mint;
 
 pub use ata::*;
 pub use helper::*;
-pub use helper::*;
+pub use mint::*;
 
 // TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb
 pub const TOKEN_2022_PROGRAM_ID: [u8; 32] = [
@@ -24,11 +30,15 @@ pub trait AccountCheck {
     fn check(account: &AccountInfo) -> Result<(), ProgramError>;
 }
 
+pub trait DataLen {
+    const LEN: usize;
+}
+
 /// Zero-copy helpers
 #[inline(always)]
 pub unsafe fn load_acc_unchecked<T: DataLen>(bytes: &[u8]) -> Result<&T, ProgramError> {
     if bytes.len() != T::LEN {
-        return Err(ProgramError::InvalidAccountData);
+        return Err(RWAError::InvalidAccountData);
     }
     Ok(&*(bytes.as_ptr() as *const T))
 }
@@ -36,7 +46,7 @@ pub unsafe fn load_acc_unchecked<T: DataLen>(bytes: &[u8]) -> Result<&T, Program
 #[inline(always)]
 pub unsafe fn load_acc_mut_unchecked<T: DataLen>(bytes: &mut [u8]) -> Result<&mut T, ProgramError> {
     if bytes.len() != T::LEN {
-        return Err(ProgramError::InvalidAccountData);
+        return Err(RWAError::InvalidAccountData);
     }
     Ok(&mut *(bytes.as_mut_ptr() as *mut T))
 }
@@ -57,8 +67,4 @@ pub unsafe fn to_bytes<T: DataLen>(data: &T) -> &[u8] {
 #[inline(always)]
 pub unsafe fn to_mut_bytes<T: DataLen>(data: &mut T) -> &mut [u8] {
     core::slice::from_raw_parts_mut(data as *mut T as *mut u8, T::LEN)
-}
-
-pub trait AccountCheck {
-    fn check(account: &AccountInfo) -> Result<(), ProgramError>;
 }

@@ -27,7 +27,10 @@ pub enum RWAError {
     InvalidAccountData,
 
     #[error("The pda doesn't exist onchain because it's balance is 0")]
-    UninitialisedAccount
+    UninitialisedAccount,
+
+    #[error("Not Enough Accounts passed that were required by the ix...")]
+    NotEnoughAccountKeys
 }
 
 
@@ -49,6 +52,7 @@ impl TryFrom<u32> for RWAError {
             4 => Ok(RWAError::InvalidAddress),
             5 => Ok(RWAError::InvalidAccountData),
             6 => Ok(RWAError::UninitialisedAccount),
+            7 => Ok(RWAError::NotEnoughAccountKeys)
             _ => Err(ProgramError::InvalidArgument),
         }
     }
@@ -64,6 +68,7 @@ impl ToStr for RWAError {
             RWAError::InvalidAddress => "Invalid address",
             RWAError::InvalidAccountData => "Invalid account data",
             RWAError::UninitialisedAccount => "The pda doesn't exist onchain because it's balance is 0",
+            RWAError::NotEnoughAccountKeys => "Not Enough Accounts passed that were required by the ix..."
         }
     }
 }

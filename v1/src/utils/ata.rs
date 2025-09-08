@@ -23,7 +23,6 @@ impl AssociatedTokenAccountCheck for AssociatedTokenAccount {
         mint: &AccountInfo,
         token_program: &AccountInfo,
     ) -> ProgramResult {
-        TokenAccount::check(account)?;
  
         if find_program_address(
             &[authority.key(), token_program.key(), mint.key()],
@@ -39,6 +38,11 @@ impl AssociatedTokenAccountCheck for AssociatedTokenAccount {
     }
 }
  
+pub trait AssociatedTokenAccountInit{
+    fn init(account: &AccountInfo, mint: &AccountInfo, payer: &AccountInfo, owner: &AccountInfo, system_program: &AccountInfo, token_program: &AccountInfo) -> ProgramResult;
+    fn init_if_needed(account: &AccountInfo, mint: &AccountInfo, payer: &AccountInfo, owner: &AccountInfo, system_program: &AccountInfo, token_program: &AccountInfo) -> ProgramResult;
+
+}
 impl AssociatedTokenAccountInit for AssociatedTokenAccount {
     fn init(account: &AccountInfo, mint: &AccountInfo, payer: &AccountInfo, owner: &AccountInfo, system_program: &AccountInfo, token_program: &AccountInfo) -> ProgramResult {
         Create {
@@ -52,7 +56,7 @@ impl AssociatedTokenAccountInit for AssociatedTokenAccount {
     }
  
     fn init_if_needed(account: &AccountInfo, mint: &AccountInfo, payer: &AccountInfo, owner: &AccountInfo, system_program: &AccountInfo, token_program: &AccountInfo) -> ProgramResult {
-        match Self::check(account, payer, mint) {
+        match Self::check(account, payer, mint, token_program) {
             Ok(_) => Ok(()),
             Err(_) => Self::init(account, mint, payer, owner, system_program, token_program),
         }

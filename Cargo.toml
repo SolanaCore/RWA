@@ -7,6 +7,46 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+num-derive = {version = "0.4.2", default-features = false }
+pinocchio = "0.8.4"
+pinocchio-log = "0.4.0"
+pinocchio-pubkey = "0.2.4"
+pinocchio-system = "0.2.3"  
+shank = "0.4.2"
+thiserror-no-std = "2.0"
+num-traits = { version = "0.2", default-features = false }
+pinocchio-token-2022 = "0.1.0"
+
+
+[dev-dependencies]
+solana-sdk = "2.2.1"
+mollusk-svm = "0.2.0"
+mollusk-svm-bencher = "0.2.0" 
+mollusk-svm-programs-memo = "0.5.1"
+mollusk-svm-programs-token = "0.5.1"
+solana-precompiles = "2.2.2"
+solana-account = "3.0.0"
+solana-pubkey = "3.0.0"
+solana-feature-set = "2.2.5"
+solana-program = "3.0.0"
+
+
+[features]
+no-entrypoint = []
+std = []
+test-default = ["no-entrypoint", "std"]
+no-log_ix_name = []
+log = []
+
+[package]
+name = "v1"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
 pinocchio = "0.8.4"
 pinocchio-log = "0.4.0"
 pinocchio-pubkey = "0.2.4"

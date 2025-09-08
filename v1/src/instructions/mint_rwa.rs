@@ -2,7 +2,7 @@ use {
     pinocchio::account_info::AccountInfo,
 };
 
-#[repr(c)]
+#[repr(C)]
 #[derive(Clone, Copy)]
 pub struct MintRWAAccount<'a> {
     pub signer: &'a AccountInfo,

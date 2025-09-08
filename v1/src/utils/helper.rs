@@ -7,6 +7,8 @@ use {
         sysvar::Sysvar,
         program::invoke_signed,
         system_instruction::create_account,
+        Signer,
+        ProgramResult
     },
     core::convert::TryFrom,
     core::mem::size_of,
@@ -20,21 +22,21 @@ use {
 
 /// Signer account
 pub struct SignerAccount<'a> {
-    pub account: &'a AccountInfo<'a>,
+    pub account: &'a AccountInfo,
 }
 
-impl<'a> TryFrom<&'a AccountInfo<'a>> for SignerAccount<'a> {
+impl<'a> TryFrom<&'a AccountInfo> for SignerAccount<'a> {
     type Error = ProgramError;
 
-    fn try_from(account: &'a AccountInfo<'a>) -> Result<Self, Self::Error> {
+    fn try_from(account: &'a AccountInfo) -> ProgramResult {
         SignerAccount::check(account)?;
-        Ok(Self { account })
+        Ok(account)
     }
 }
 
 impl<'a> AccountCheck for SignerAccount<'a> {
-    fn check(account: &AccountInfo) -> Result<(), ProgramError> {
-        if !account.is_signer {
+    fn check(account: &AccountInfo) -> ProgramResult {
+        if !account.is_signer() {
             return Err(RWAError::NotSigner.into());
         }
         Ok(())
@@ -43,20 +45,20 @@ impl<'a> AccountCheck for SignerAccount<'a> {
 
 /// System account
 pub struct SystemAccount<'a> {
-    pub account: &'a AccountInfo<'a>,
+    pub account: &'a AccountInfo,
 }
 
-impl<'a> TryFrom<&'a AccountInfo<'a>> for SystemAccount<'a> {
+impl<'a> TryFrom<&'a AccountInfo> for SystemAccount<'a> {
     type Error = ProgramError;
 
-    fn try_from(account: &'a AccountInfo<'a>) -> Result<Self, Self::Error> {
+    fn try_from(account: &'a AccountInfo) -> ProgramResult {
         SystemAccount::check(account)?;
-        Ok(Self { account })
+        Ok(account)
     }
 }
 
 impl<'a> AccountCheck for SystemAccount<'a> {
-    fn check(account: &AccountInfo) -> Result<(), ProgramError> {
+    fn check(account: &AccountInfo) -> ProgramResult {
         if !account.is_owned_by(&pinocchio::system_program::ID) {
             return Err(RWAError::InvalidOwner.into());
         }
@@ -66,20 +68,20 @@ impl<'a> AccountCheck for SystemAccount<'a> {
 
 /// Program account (PDA)
 pub struct ProgramAccount<'a> {
-    pub account: &'a AccountInfo<'a>,
+    pub account: &'a AccountInfo,
 }
 
-impl<'a> TryFrom<&'a AccountInfo<'a>> for ProgramAccount<'a> {
+impl<'a> TryFrom<&'a AccountInfo> for ProgramAccount<'a> {
     type Error = ProgramError;
 
-    fn try_from(account: &'a AccountInfo<'a>) -> Result<Self, Self::Error> {
+    fn try_from(account: &'a AccountInfo) -> ProgramResult {
         ProgramAccount::check(account)?;
         Ok(Self { account })
     }
 }
 
 impl<'a> AccountCheck for ProgramAccount<'a> {
-    fn check(account: &AccountInfo) -> Result<(), ProgramError> {
+    fn check(account: &'a AccountInfo) -> ProgramResult {
          
 
         if !account.is_owned_by(&ID) {
@@ -93,15 +95,15 @@ impl<'a> AccountCheck for ProgramAccount<'a> {
 /// Trait for initializing a program account (PDA)
 pub trait ProgramAccountInit {
     fn init<'a>(
-        payer: &AccountInfo<'a>,
-        account: &AccountInfo<'a>,
+        payer: &'a AccountInfo,
+        account: &'a AccountInfo,
         seeds: &[&[u8]],
         space: usize,
     ) -> Result<(), ProgramError>;
 
     fn init_if_needed<'a>(
-        payer: &AccountInfo<'a>,
-        account: &AccountInfo<'a>,
+        payer: &'a AccountInfo,
+        account: &'a AccountInfo,
         seeds: &[&[u8]],
         space: usize,
     ) -> Result<(), ProgramError>;
@@ -109,32 +111,32 @@ pub trait ProgramAccountInit {
 
 impl ProgramAccountInit for ProgramAccount<'_> {
     fn init<'a>(
-        payer: &AccountInfo<'a>,
-        account: &AccountInfo<'a>,
+        payer: &'a AccountInfo,
+        account: &'a AccountInfo,
         seeds: &[&[u8]],
         space: usize,
-    ) -> Result<(), ProgramError> {
+    ) -> ProgramResult {
         let lamports = Rent::get()?.minimum_balance(space);
-        let signer_seeds: &[&[u8]] = seeds;
 
         let ix = create_account(
-            payer.key,
-            account.key,
+            payer.key(),
+            account.key(),
             lamports,
             space as u64,
             &ID,
         );
+        let signer_seeds = Signer::from(signer_seeds);
 
-        invoke_signed(&ix, &[payer.clone(), account.clone()], &[signer_seeds])?;
+        invoke_signed(&ix, &[&payer, &account], &[signer_seeds])?;
         Ok(())
     }
 
     fn init_if_needed<'a>(
-        payer: &AccountInfo<'a>,
-        account: &AccountInfo<'a>,
+        payer: &'a AccountInfo,
+        account: &'a AccountInfo,
         seeds: &[&[u8]],
         space: usize,
-    ) -> Result<(), ProgramError> {
+    ) -> ProgramResult {
         match ProgramAccount::check(account) {
             Ok(_) => Ok(()),
             Err(_) => Self::init(payer, account, seeds, space),
@@ -144,11 +146,11 @@ impl ProgramAccountInit for ProgramAccount<'_> {
 
 /// Trait for closing a program account safely
 pub trait AccountClose {
-    fn close(account: &AccountInfo, destination: &AccountInfo) -> Result<(), ProgramError>;
+    fn close(account: &'a AccountInfo, destination: &'a AccountInfo) -> ProgramResult;
 }
 
-impl AccountClose for ProgramAccount<'_> {
-    fn close(account: &AccountInfo, destination: &AccountInfo) -> Result<(), ProgramError> {
+impl<'a> AccountClose<'a> for ProgramAccount<'_> {
+    fn close<'a>(account: &'a AccountInfo, destination: &'a AccountInfo) -> ProgramResult {
         let lamports = **account.lamports.borrow();
         **destination.lamports.borrow_mut() += lamports;
         **account.lamports.borrow_mut() = 0;
