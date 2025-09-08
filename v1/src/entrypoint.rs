@@ -2,7 +2,7 @@
 
 use crate::{
     instructions::{self, RWAInstruction},
-    errors::MyProgramError,
+    errors::RWAError,
 };
 use pinocchio::{
     account_info::AccountInfo, default_panic_handler, msg, no_allocator, program_entrypoint,
@@ -33,7 +33,7 @@ Ok(())
 // ) -> ProgramResult {
 //     let (ix_disc, instruction_data) = instruction_data
 //         .split_first()
-//         .ok_or(MyProgramError::InvalidInstructionData)?;
+//         .ok_or(RWAError::InvalidInstructionData)?;
 
 //     // match RWAInstruction::try_from(ix_disc)? {
 //     //     RWAInstruction::InitializeState => {

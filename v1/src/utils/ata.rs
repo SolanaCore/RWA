@@ -1,11 +1,14 @@
-use pinocchio_associated_token_account::{
-    instruction::Create
+use {
+    pinocchio::{
+        account_info::AccountInfo,
+        program_error::ProgramError,
+        pubkey::find_program_address,
+        ProgramResult,
+    },
+    pinocchio_associated_token_account::instruction::Create,
+    crate::errors::RWAError,
 };
-use pinocchio::program_error::ProgramError;
-use crate::errors::MyProgramError;
-use pinocchio::ProgramResult;
-use pinocchio::account_info::AccountInfo;
-use pinocchio::pubkey::find_program_address;
+
 
 pub trait AssociatedTokenAccountCheck {
     fn check(account: &AccountInfo, authority: &AccountInfo, mint: &AccountInfo, token_program: &AccountInfo) -> ProgramResult
@@ -29,7 +32,7 @@ impl AssociatedTokenAccountCheck for AssociatedTokenAccount {
         .0
         .ne(account.key())
         {
-            return Err(MyProgramError::InvalidAddress.into());
+            return Err(RWAError::InvalidAddress.into());
         }
  
         Ok(())

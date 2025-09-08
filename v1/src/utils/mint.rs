@@ -1,15 +1,20 @@
-use pinocchio_token_2022::{
-    instruction::{CreateAccount, InitializeMint2},
-    states::Mint,
+use {
+    pinocchio::{
+        account_info::AccountInfo,
+        instruction::Signer,
+        program_error::ProgramError,
+        pubkey::Pubkey,
+        rent::Rent,
+    },
+    pinocchio_token_2022::{
+        instruction::{CreateAccount, InitializeMint2},
+        states::Mint,
+    },
+    crate::{
+        errors::RWAError,
+        utils::{AccountCheck, load_acc_mut_unchecked},
+    },
 };
-use pinocchio::program_error::ProgramError;
-use pinocchio::pubkey::Pubkey;
-use pinocchio::rent::Rent;
-use pinocchio::account_info::AccountInfo;
-
-use crate::errors::MyProgramError;
-use crate::utils::{AccountCheck, load_acc_mut_unchecked};
-use pinocchio::instruction::Signer;
 
 /// Trait for initializing mints and metadata
 pub trait MintInit {
@@ -58,12 +63,12 @@ pub struct Mint2022Account;
 impl AccountCheck for Mint2022Account {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
         if !account.is_owned_by(&pinocchio_token_2022::ID) {
-            return Err(MyProgramError::InvalidOwner.into());
+            return Err(RWAError::InvalidOwner.into());
         }
 
         let data = account.try_borrow_data()?;
         if data.len() != Mint::LEN {
-            return Err(MyProgramError::InvalidAccountData.into());
+            return Err(RWAError::InvalidAccountData.into());
         }
 
         Ok(())
@@ -138,10 +143,10 @@ impl MintInit for Mint2022Account {
         // Borrow PDA buffer
         let mut data = metadata.try_borrow_mut_data()?;
         let metadata: &mut crate::state::TokenMetadata =
-            unsafe { load_acc_mut_unchecked(&mut data)? };
+            unsafe { load_acc_mut_unchecked::<TokenMetadata>(&mut data)? };
 
             if name.len() > 32 {
-                return Err(MyProgramError::InvalidInstructionData.into())?;
+                return Err(RWAError::InvalidInstructionData.into())?;
             }
         // Fill metadata
         metadata.mint = mint.as_bytes();

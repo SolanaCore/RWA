@@ -7,7 +7,7 @@ use {
 };
 /// Custom program errors specific to your app
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq, ShankType)]
-pub enum MyProgramError {
+pub enum RWAError {
     #[error("Invalid instruction data")]
     InvalidInstructionData,
 
@@ -31,39 +31,39 @@ pub enum MyProgramError {
 }
 
 
-impl From<MyProgramError> for ProgramError {
-    fn from(e: MyProgramError) -> Self {
+impl From<RWAError> for ProgramError {
+    fn from(e: RWAError) -> Self {
         ProgramError::Custom(e as u32)
     }
 }
 
-impl TryFrom<u32> for MyProgramError {
+impl TryFrom<u32> for RWAError {
     type Error = ProgramError;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(MyProgramError::InvalidInstructionData),
-            1 => Ok(MyProgramError::PdaMismatch),
-            2 => Ok(MyProgramError::InvalidOwner),
-            3 => Ok(MyProgramError::NotSigner),
-            4 => Ok(MyProgramError::InvalidAddress),
-            5 => Ok(MyProgramError::InvalidAccountData),
-            6 => Ok(MyProgramError::UninitialisedAccount),
+            0 => Ok(RWAError::InvalidInstructionData),
+            1 => Ok(RWAError::PdaMismatch),
+            2 => Ok(RWAError::InvalidOwner),
+            3 => Ok(RWAError::NotSigner),
+            4 => Ok(RWAError::InvalidAddress),
+            5 => Ok(RWAError::InvalidAccountData),
+            6 => Ok(RWAError::UninitialisedAccount),
             _ => Err(ProgramError::InvalidArgument),
         }
     }
 }
 
-impl ToStr for MyProgramError {
+impl ToStr for RWAError {
     fn to_str<E>(&self) -> &'static str {
         match self {
-            MyProgramError::InvalidInstructionData => "Invalid instruction data",
-            MyProgramError::PdaMismatch => "PDA mismatch",
-            MyProgramError::InvalidOwner => "Invalid account owner",
-            MyProgramError::NotSigner => "Expected a signer",
-            MyProgramError::InvalidAddress => "Invalid address",
-            MyProgramError::InvalidAccountData => "Invalid account data",
-            MyProgramError::UninitialisedAccount => "The pda doesn't exist onchain because it's balance is 0",
+            RWAError::InvalidInstructionData => "Invalid instruction data",
+            RWAError::PdaMismatch => "PDA mismatch",
+            RWAError::InvalidOwner => "Invalid account owner",
+            RWAError::NotSigner => "Expected a signer",
+            RWAError::InvalidAddress => "Invalid address",
+            RWAError::InvalidAccountData => "Invalid account data",
+            RWAError::UninitialisedAccount => "The pda doesn't exist onchain because it's balance is 0",
         }
     }
 }

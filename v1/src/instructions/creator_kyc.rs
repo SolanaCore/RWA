@@ -1,18 +1,18 @@
 use {
     crate::{
-        utils::helper::{SignerAccount, ProgramAccount, load_acc_mut_unchecked},
+        utils::{SignerAccount, ProgramAccount, load_acc_mut_unchecked},
         instruction::RWAInstruction::CreatorKYC,
+        errors::RWAError
     },
     pinocchio::{
         account_info::AccountInfo,
         pubkey::Pubkey,
         program_error::ProgramError,
     },
-    std::convert::TryFrom,
-     pinocchio::{seeds, instruction::Signer, next_account_info};
+    core::convert::TryFrom,
+    pinocchio::{seeds, instruction::Signer, next_account_info};
 
 };
-
 
 /// Struct holding all relevant accounts for InitGlobalConfig
 pub struct CreatorKYCAccount<'a> {
@@ -63,7 +63,7 @@ impl<'a> CreatorKYCInstruction<'a> {
 
         // Check PDA matches the account passed in
         if *self.accounts.creator_kyc.account.key != expected_pda {
-            return Err(ProgramError::InvalidAccountData);
+            return Err(RWAError::InvalidAccountData);
         }
         let seeds_array = seeds!(b"creator-kyc", self.accounts.creator_kyc.key.as_ref(), program_id);
         let signer_pda = Signer::from(&seeds_array);

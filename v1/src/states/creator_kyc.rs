@@ -1,4 +1,7 @@
-use pinocchio::pubkey::Pubkey;
+use {
+    pinocchio::pubkey::Pubkey,
+    crate::utils::DataLen,
+};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -10,11 +13,6 @@ pub struct CreatorKYC {
     pub bump:u8,
 }
 
-
-pub trait DataLen {
-    //we dont add pub prefix because items share the visibility of their trait... 
-    const LEN: usize;
-}
 impl DataLen for CreatorKYC {
      const LEN: usize = core::mem::size_of::<CreatorKYC>(); 
 }

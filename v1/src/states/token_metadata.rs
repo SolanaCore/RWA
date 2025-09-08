@@ -1,3 +1,7 @@
+use {
+    crate::utils::DataLen,
+}
+
 #[repr(c)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Metadata {
@@ -11,9 +15,6 @@ pub struct Metadata {
     pub bump: u8,              // 1
 }
 
-pub trait DataLen {
-    const LEN: u8;
-}
 
 impl DataLen for Metadata {
     pub const LEN:usize = core::mem::size_of<Metadata>;

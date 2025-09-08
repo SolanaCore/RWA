@@ -1,23 +1,25 @@
 use {
-    crate::{
-        instructions::{InitGlobalConfig, InitTokenConfig, load_acc_mut_unchecked},
-        utils::helper::{SignerAccount, ProgramAccount},
-        states::TokenConfig,
-    },
+    core::convert::TryFrom,
     pinocchio::{
         account_info::AccountInfo,
-        pubkey::Pubkey,
+        instruction::Signer,
         program_error::ProgramError,
+        pubkey::Pubkey,
+        ProgramResult,
+        seeds,
     },
-    core::convert::TryFrom,
+    crate::{
+        errors::RWAError,
+        instructions::{
+            CreatorKYC,
+            InitGlobalConfig,
+            InitTokenConfig,
+            load_acc_mut_unchecked,
+        },
+        states::{GlobalConfig, TokenConfig},
+        utils::{ProgramAccount, SignerAccount},
+    },
 };
-use pinocchio::instruction::Signer;
-use crate::errors::MyProgramError;
- use crate::instructions::CreatorKYC;
-use crate::states::GlobalConfig;
-use pinocchio::ProgramResult;
-use pinocchio::{seeds, instruction::Signer};
-
 
 /// Accounts required to initialize a token config
 pub struct TokenConfigAccounts<'a> {
@@ -87,14 +89,14 @@ impl<'a> InitTokenConfigInstruction<'a> {
         let global_config: &mut GlobalConfig = unsafe { load_acc_mut_unchecked(global_config_data)? };
 
         if self.instruction_datas.decimals <= global_config.max_decimal {
-            return Err(MyProgramError::InvalidInstructionData.into())
+            return Err(RWAError::InvalidInstructionData.into())
         };
 
         let creator_kyc_data = &mut self.accounts.user_kyc.account.try_borrow_mut_data()?;
         let creator_kyc: &mut CreatorKYC = unsafe { load_acc_mut_unchecked(creator_kyc_data)? };
 
         if creator_kyc.verified == false {
-            return Err(MyProgramError::CreatorNotVerified.into())
+            return Err(RWAError::CreatorNotVerified.into())
         };
 
         // Write instruction data into PDA struct

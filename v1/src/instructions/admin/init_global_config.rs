@@ -1,18 +1,17 @@
 use {
-    crate::{
-        utils::helper::{SignerAccount, ProgramAccount, load_acc_mut_unchecked},
-        instructions::RWAInstruction::InitGlobalConfig,
-    },
+    core::convert::TryFrom,
     pinocchio::{
         account_info::AccountInfo,
-        pubkey::Pubkey,
+        instruction::{Signer, next_account_info},
         program_error::ProgramError,
+        pubkey::Pubkey,
+        seeds,
     },
-    core::convert::TryFrom,
+    crate::{
+        instructions::RWAInstruction, // or `InitGlobalConfig` if you only need that variant
+        utils::{ProgramAccount, SignerAccount, load_acc_mut_unchecked},
+    },
 };
- use pinocchio::instruction::Signer;
-use pinocchio::next_account_info;
-use pinocchio::{seeds, instruction::Signer};
 
 
 /// Struct holding all relevant accounts for InitGlobalConfig

@@ -6,10 +6,10 @@ mod entrypoint;
 #[cfg(feature = "std")]
 extern crate std;
 
-pub mod errors;
-pub mod instructions;
-pub mod states;
-pub mod utils;
+
+pub mod {
+    errors, instructions, states, utils
+};
 
 pinocchio_pubkey::declare_id!("FqqrXWzPLkYZsg2r4GfMdzWSdYHorCdkyhupmxRXAzVq");
 

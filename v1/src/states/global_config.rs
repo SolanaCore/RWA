@@ -1,5 +1,11 @@
-use crate::instructions::RWAInstruction::InitGlobalConfig;
-use pinocchio::pubkey::Pubkey;
+use {
+    pinocchio::pubkey::Pubkey,
+    crate::{
+        instructions::RWAInstruction::InitGlobalConfig,
+        utils::DataLen,
+    },
+};
+
 
 #[repr(C)] 
 #[derive(Clone, Copy, Debug, PartialEq, shank::ShankAccount)]
@@ -13,10 +19,6 @@ pub struct GlobalConfig {
     pub bump: u8,
 }
 
-
-pub trait DataLen {
-    const LEN: usize;
-}
 
 impl DataLen for GlobalConfig {
 const LEN: usize = core::mem::size_of::<GlobalConfig>();

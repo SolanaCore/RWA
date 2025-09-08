@@ -1,4 +1,7 @@
-use pinocchio::pubkey::Pubkey;
+use {
+    pinocchio::pubkey::Pubkey,
+    crate::utils::DataLen,
+};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, shank::ShankAccount)]
@@ -11,10 +14,6 @@ pub struct TokenConfig {
     pub description: [u8; 128],  // fixed max length (128 chars)
     pub asset: [u8; 8],          // e.g. gold, real_estate or some sort of physical asset
     pub audit_cid: [u8; 32],     // compact audit link (like IPFS CID)
-}
-
-pub trait DataLen {
-    const LEN: usize;
 }
 
 impl DataLen for TokenConfig {

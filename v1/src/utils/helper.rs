@@ -10,15 +10,13 @@ use {
     },
     core::convert::TryFrom,
     core::mem::size_of,
-    crate::errors::MyProgramError,
+    crate::errors::RWAError,
     crate::states::GlobalConfig,
     crate::ID,
+    crate::utils::{
+        AccountCheck, load_acc_mut_unchecked
+    },
 };
-
-/// Trait to check accounts
-pub trait AccountCheck {
-    fn check(account: &AccountInfo) -> Result<(), ProgramError>;
-}
 
 /// Signer account
 pub struct SignerAccount<'a> {
@@ -37,7 +35,7 @@ impl<'a> TryFrom<&'a AccountInfo<'a>> for SignerAccount<'a> {
 impl<'a> AccountCheck for SignerAccount<'a> {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
         if !account.is_signer {
-            return Err(MyProgramError::NotSigner.into());
+            return Err(RWAError::NotSigner.into());
         }
         Ok(())
     }
@@ -60,7 +58,7 @@ impl<'a> TryFrom<&'a AccountInfo<'a>> for SystemAccount<'a> {
 impl<'a> AccountCheck for SystemAccount<'a> {
     fn check(account: &AccountInfo) -> Result<(), ProgramError> {
         if !account.is_owned_by(&pinocchio::system_program::ID) {
-            return Err(MyProgramError::InvalidOwner.into());
+            return Err(RWAError::InvalidOwner.into());
         }
         Ok(())
     }
@@ -85,7 +83,7 @@ impl<'a> AccountCheck for ProgramAccount<'a> {
          
 
         if !account.is_owned_by(&ID) {
-            return Err(MyProgramError::InvalidOwner.into());
+            return Err(RWAError::InvalidOwner.into());
         }
 
         Ok(())
@@ -158,13 +156,4 @@ impl AccountClose for ProgramAccount<'_> {
         account.try_borrow_mut_data()?.fill(0);
         Ok(())
     }
-}
-
-/// Zero-copy helper
-#[inline(always)]
-pub unsafe fn load_acc_mut_unchecked<T: Sized>(bytes: &mut [u8]) -> Result<&mut T, ProgramError> {
-    if bytes.len() != size_of::<T>() {
-        return Err(ProgramError::InvalidAccountData);
-    }
-    Ok(&mut *(bytes.as_mut_ptr() as *mut T))
 }

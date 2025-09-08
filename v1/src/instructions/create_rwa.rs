@@ -1,11 +1,18 @@
-use pinocchio::account_info::AccountInfo;
-use pinocchio::program_error::ProgramError;
-use pinocchio::ProgramResult;
-use crate::instructions::CreateRWA;
-use pinocchio_log;
-use crate::utils::mint::Mint2022Account;
-use crate::utils::helper::{SignerAccount, ProgramAccount, SystemAccount};
-use pinocchio::next_account_info;
+use {
+    pinocchio::{
+        account_info::AccountInfo,
+        instruction::next_account_info,
+        program_error::ProgramError,
+        ProgramResult,
+    },
+    pinocchio_log,
+    crate::{
+        instructions::CreateRWA,
+        utils::{
+            ProgramAccount, SignerAccount, SystemAccount,Mint2022Account,
+        },
+    },
+};
 
 pub struct CreateRWAAccount<'a> {
     pub signer: &'a AccountInfo,
@@ -19,7 +26,6 @@ pub struct CreateRWAAccount<'a> {
 impl<'a> TryFrom<&'a [AccountInfo<'a>]> for CreateRWAAccount<'a> {
     type Error = ProgramError;
 
-    #[pinocchio_log::log_cu_usage]
     fn try_from(infos: &'a [AccountInfo<'a>]) -> Result<Self, Self::Error> {
         let mut iter = infos.iter();
 

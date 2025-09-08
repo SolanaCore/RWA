@@ -1,5 +1,10 @@
-use pinocchio::program_error::ProgramError;
-use crate::errors::MyProgramError;
+use {
+    pinocchio::program_error::ProgramError,
+    crate::{
+        errors::RWAError,
+        utils::{load_ix_data, DataLen}
+    },
+}
 
 pub mod create_rwa;
 pub use create_rwa::*;
@@ -15,6 +20,12 @@ pub use mint_rwa::*;
 
 pub mod admin;
 pub use admin::*;
+
+
+/// Zero-copy trait
+pub trait ZeroCopyTryFrom<'a>: Sized {
+    fn try_from_bytes(data: &'a [u8]) -> Result<&'a Self, ProgramError>;
+}
 
 
 /// Instruction enum
@@ -38,7 +49,7 @@ pub enum RWAInstruction {
 
 }
 
-/// Struct for InitGlobalConfig
+/// Init Global Config
 #[repr(C)]
 pub struct InitGlobalConfig {
     pub bump: u8,
@@ -58,7 +69,7 @@ impl<'a> ZeroCopyTryFrom<'a> for InitGlobalConfig {
     }
 }
 
-/// Struct for CreatorKYC
+/// Init Creator KYC
 #[repr(C)]
 pub struct CreatorKYC {
     pub name: [u8; 32],   // fixed-length, UTF-8 string
@@ -76,23 +87,7 @@ impl<'a> ZeroCopyTryFrom<'a> for CreatorKYC {
     }
 }
 
-/// Struct for MintRWA
-#[repr(C)]
-pub struct MintRWA {
-    pub amount: u64,
-}
-
-impl DataLen for MintRWA {
-    const LEN: usize = core::mem::size_of::<Self>();
-}
-
-impl<'a> ZeroCopyTryFrom<'a> for MintRWA {
-    fn try_from_bytes(data: &'a [u8]) -> Result<&'a Self, ProgramError> {
-        unsafe { load_ix_data::<Self>(data) }
-    }
-}
-
-/// Struct for CreateRWA
+/// Struct for Create RWA
 #[repr(C)]
 pub struct CreateRWA {
     pub supply: u64,
@@ -109,45 +104,19 @@ impl<'a> ZeroCopyTryFrom<'a> for CreateRWA {
     }
 }
 
-/// Trait for getting struct size
-pub trait DataLen {
-    const LEN: usize;
+
+/// Mint RWA
+#[repr(C)]
+pub struct MintRWA {
+    pub amount: u64,
 }
 
-/// Zero-copy trait
-pub trait ZeroCopyTryFrom<'a>: Sized {
-    fn try_from_bytes(data: &'a [u8]) -> Result<&'a Self, ProgramError>;
+impl DataLen for MintRWA {
+    const LEN: usize = core::mem::size_of::<Self>();
 }
 
-/// Zero-copy helpers
-#[inline(always)]
-pub unsafe fn load_acc_unchecked<T: DataLen>(bytes: &[u8]) -> Result<&T, ProgramError> {
-    if bytes.len() != T::LEN {
-        return Err(ProgramError::InvalidAccountData);
+impl<'a> ZeroCopyTryFrom<'a> for MintRWA {
+    fn try_from_bytes(data: &'a [u8]) -> Result<&'a Self, ProgramError> {
+        unsafe { load_ix_data::<Self>(data) }
     }
-    Ok(&*(bytes.as_ptr() as *const T))
-}
-
-#[inline(always)]
-pub unsafe fn load_acc_mut_unchecked<T: DataLen>(bytes: &mut [u8]) -> Result<&mut T, ProgramError> {
-    if bytes.len() != T::LEN {
-        return Err(ProgramError::InvalidAccountData);
-    }
-    Ok(&mut *(bytes.as_mut_ptr() as *mut T))
-}
-
-#[inline(always)]
-pub unsafe fn load_ix_data<T: DataLen>(bytes: &[u8]) -> Result<&T, ProgramError> {
-    if bytes.len() != T::LEN {
-        return Err(MyProgramError::InvalidInstructionData.into());
-    }
-    Ok(&*(bytes.as_ptr() as *const T))
-}
-
-pub unsafe fn to_bytes<T: DataLen>(data: &T) -> &[u8] {
-    core::slice::from_raw_parts(data as *const T as *const u8, T::LEN)
-}
-
-pub unsafe fn to_mut_bytes<T: DataLen>(data: &mut T) -> &mut [u8] {
-    core::slice::from_raw_parts_mut(data as *mut T as *mut u8, T::LEN)
 }

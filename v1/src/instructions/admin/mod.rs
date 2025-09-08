@@ -9,3 +9,6 @@ pub use verify_creator_kyc::*;
 
 pub mod verify_token_config;
 pub use verify_token_config::*;
+
+pub mod admin;
+pub use admin::*;
