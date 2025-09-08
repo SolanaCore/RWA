@@ -7,9 +7,10 @@ mod entrypoint;
 extern crate std;
 
 
-pub mod {
-    errors, instructions, states, utils
-};
+pub mod errors;
+pub mod instructions;
+pub mod states;
+pub mod utils;
 
 pinocchio_pubkey::declare_id!("FqqrXWzPLkYZsg2r4GfMdzWSdYHorCdkyhupmxRXAzVq");
 
