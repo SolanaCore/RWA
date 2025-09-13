@@ -1,3 +1,4 @@
+// Enforces no-std to prevents accidental heap usage:
 #![no_std]
 
 #[cfg(not(feature = "no-entrypoint"))]

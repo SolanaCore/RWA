@@ -3,10 +3,11 @@
 use crate::{
     instructions::{self, RWAInstruction},
     errors::RWAError,
-};
-use pinocchio::{
+    pinocchio::{
     account_info::AccountInfo, default_panic_handler, msg, no_allocator, program_entrypoint,
     program_error::ProgramError, pubkey::Pubkey, ProgramResult,
+   },
+   pinocchio_log::log
 };
 
 // This is the entrypoint for the program.
@@ -16,41 +17,86 @@ no_allocator!();
 // Use the no_std panic handler.
 default_panic_handler!();
 
-
 #[inline(always)]
-pub fn process_instruction(
+fn process_instruction(
     _program_id: &Pubkey,
-    acccounts: &[AccountInfo],
+    accounts: &[AccountInfo],
     instruction_data: &[u8],
-) -> ProgramResult{
-Ok(())
-}
-// #[inline(always)]
-// fn process_instruction(
-//     _program_id: &Pubkey,
-//     accounts: &[AccountInfo],
-//     instruction_data: &[u8],
-// ) -> ProgramResult {
-//     let (ix_disc, instruction_data) = instruction_data
-//         .split_first()
-//         .ok_or(RWAError::InvalidInstructionData)?;
+) -> ProgramResult {
+    let (ix_disc, instruction_data) = instruction_data
+        .split_first()
+        .ok_or(RWAError::InvalidInstructionData)?;
 
-//     // match RWAInstruction::try_from(ix_disc)? {
-//     //     RWAInstruction::InitializeState => {
-//     //         msg!("init_global_cinfig");
-//     //         init_global_config(accounts, instruction_data)
-//     //     },
-//     //     RWAInstruction::InitTokenConfig => {
-//     //         msg!("Init_token_config");
-//     //         init_token_config(accounts, instruction_data)
-//     //     },
-//     //     RWAInstruction::CreateRWA => {
-//     //         msg!("Create RWA");
-//     //         create_rwa(accounts, instruction_data);
-//     //     },
-//     //     RWAInstruction::MintRWA => {
-//     //         msg!("Mint RWA");
-//     //         mint_rwa(accounts, instruction_data);
-//     //     },
-//     // }
-// }
+        match ix_disc {
+            0 => {
+                #[cfg(not(feature = "perf"))]
+                log!("INIT_GLOBAL_CONFIG");
+
+                let mut ix = InitGlobalConfigInstruction::try_from((rest, accounts))?;
+                ix.process(program_id)
+                Ok(())
+            },
+
+            1 => {
+                #[cfg(not(feature = "perf"))]
+                log!("UPDATE_GLOBAL_CONFIG");
+                // let mut ix = UpdateGlobalConfigInstruction::try_from((rest, accounts))?;
+                // ix.process(program_id)
+                Ok(())
+            },
+
+            2 => {
+                #[cfg(not(feature = "perf"))]
+                log!("CREATOR_KYC");
+                let mut ix = CreatorKYCInstruction::try_from((rest, accounts))?;
+                ix.process(program_id)
+                Ok(())
+            },
+            3 => {
+                #[cfg(not(feature = "perf"))]
+                log!("VERIFY_CREATOR_KYC");
+                // let mut ix = VerifyCreatorKYCInstruction::try_from((rest, accounts))?;
+                // ix.process(program_id)
+                Ok(())
+            },
+            4 => {
+                #[cfg(not(feature = "perf"))]
+                log!("INIT_TOKEN_CONFIGURATION");
+                let mut ix = InitTokenConfigInstruction::try_from((rest, accounts))?;
+                ix.process(program_id)
+                Ok(())
+            },
+            5 => {
+                #[cfg(not(feature = "perf"))]
+                log!("VERIFY_TOKEN_CONFIGURATION");
+                // let mut ix = VerifyTokenConfigInstruction::try_from((rest, accounts))?;
+                // ix.process(program_id)
+                Ok(())
+            },
+            6 => {
+                #[cfg(not(feature = "perf"))]
+                log!("CREATE_RWA_MINT & METADATA");
+                // let mut ix = CreateRWAInstruction::try_from((rest, accounts))?;
+                // ix.process(program_id)
+                Ok(())
+            },
+            7 => {
+                #[cfg(not(feature = "perf"))]
+                log!("MINT_RWA_TOKEN");
+                // let mut ix = MintRWAInstruction::try_from((rest, accounts))?;
+                // ix.process(program_id)
+                Ok(())
+            },
+            //batch processing 
+            255 => {
+                #[cfg(not(feature = "perf"))]
+                log!("BATCH PROCESSING - FEAT: COMING SOON");
+                Ok(())
+            },
+            _ => {
+                log!("FALLBACK INSTRUCTION");
+                Ok(())
+            }
+        }
+       }
+}
